@@ -1,0 +1,11 @@
+{
+  "name": "Steamder",
+  "author": "SANSO",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["library", "fun", "utility"],
+    "description": "A dating app for your Steam library. Swipe right on games you want to play, left on the ones you'll ghost.",
+    "image": ""
+  }
+}
