@@ -361,19 +361,40 @@ const CSS = `
   font-size: 13px !important; display: flex !important; align-items: center !important; justify-content: center !important; white-space: nowrap !important; box-sizing: border-box !important; }
 .sd-match { position: fixed; left: 0; right: 0; bottom: 0; top: 40px; z-index: 50; background: rgba(12,6,20,0.94); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 .sd-match h1 { font-size: 38px; margin: 0; font-weight: 800; background: linear-gradient(90deg, #ff4f79, #ff9a5a); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.sd-match img { width: 260px; height: 122px; object-fit: cover; border-radius: 14px; box-shadow: 0 0 30px rgba(255,79,121,0.5); }
+.sd-pic { display: block; }
+.sd-match .sd-pic { width: 260px; height: 122px; background-size: cover; border-radius: 14px; box-shadow: 0 0 30px rgba(255,79,121,0.5); }
 .sd-mbtns { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 10px !important; width: 520px; }
 .sd-mbtns > * { margin: 0 !important; min-width: 0 !important; width: 100% !important; height: 44px !important; min-height: 44px !important; padding: 0 4px !important;
   font-size: 14px !important; font-weight: bold; display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; }
 `;
 
-// An image that walks down a list of addresses until one loads.
-function ChainImg({ srcs, className, style }: { srcs: string[]; className?: string; style?: any }) {
+// Walks down a list of addresses until one loads and returns its index (past the end = none loaded).
+// The picture is probed with an Image() that is never put on the page, and drawn as a CSS background: other plugins that
+// restyle every <img> they find in Steam (3D Game Cases turns any portrait cover into a 3D case) never see Steamder's art.
+function useChain(srcs: string[]): number {
   const key = srcs.join("|");
   const [state, setState] = useState({ key, i: 0 });
   const i = state.key === key ? state.i : 0;
-  if (i >= srcs.length) return <div className={className} style={style} />;
-  return <img className={className} style={style} src={srcs[i]} alt="" onError={() => setState({ key, i: i + 1 })} />;
+  const src = srcs[i];
+  useEffect(() => {
+    if (!src) return;
+    let dead = false;
+    const probe = new Image();
+    probe.onerror = () => { if (!dead) setState({ key, i: i + 1 }); };
+    probe.src = src;
+    return () => { dead = true; probe.onerror = null; };
+  }, [key, i]);
+  return i;
+}
+
+const bgStyle = (src: string | undefined, size: string, extra?: any) => ({
+  backgroundImage: src ? `url("${src}")` : undefined, backgroundSize: size, backgroundPosition: "center", backgroundRepeat: "no-repeat", ...extra,
+});
+
+// A picture that walks down a list of addresses until one loads (a div with a background, not an <img>).
+function ChainImg({ srcs, className, style }: { srcs: string[]; className?: string; style?: any }) {
+  const i = useChain(srcs);
+  return <div className={`sd-pic ${className || ""}`} style={bgStyle(srcs[i], "cover", style)} />;
 }
 
 function Thumb({ appid, img }: { appid: number; img?: string }) {
@@ -382,17 +403,12 @@ function Thumb({ appid, img }: { appid: number; img?: string }) {
 
 function CardArt({ appid, img }: { appid: number; img?: string }) {
   const srcs = [portraitArt(appid), ...wide(appid, img)];
-  const key = srcs.join("|");
-  const [state, setState] = useState({ key, i: 0 });
-  const i = state.key === key ? state.i : 0;
-  const cur = srcs[i];
+  const i = useChain(srcs);
   return (
     <>
       <ChainImg className="sd-bg sd-bgblur" srcs={wide(appid, img)} />
-      {cur && i === 0 && <img className="sd-bg" src={cur} alt="" onError={() => setState({ key, i: 1 })} />}
-      {cur && i > 0 && (
-        <img className="sd-bg" style={{ height: "46%", top: "6%", objectFit: "contain" }} src={cur} alt="" onError={() => setState({ key, i: i + 1 })} />
-      )}
+      {i === 0 && <div className="sd-pic sd-bg" style={bgStyle(srcs[0], "cover")} />}
+      {i > 0 && i < srcs.length && <div className="sd-pic sd-bg" style={bgStyle(srcs[i], "contain", { height: "46%", top: "6%" })} />}
     </>
   );
 }
@@ -804,9 +820,9 @@ function SwipeTab({ mode, onChanged }: { mode: Mode; onChanged: () => void }) {
       )}
       {card && (
         <div className="sd-row2">
-          <div className="sd-stage">
+          <div className="sd-stage" data-sanso-skip="1">
             {behind && (
-              <div className="sd-card sd-behind">
+              <div className="sd-card sd-behind" data-sanso-skip="1">
                 <CardBody c={behind} />
               </div>
             )}
@@ -828,6 +844,7 @@ function SwipeTab({ mode, onChanged }: { mode: Mode; onChanged: () => void }) {
             >
               <div
                 className={`sd-card${dragging ? " sd-drag" : ""}`}
+                data-sanso-skip="1"
                 style={{ transform: `translate(${dx}px, ${dy}px) rotate(${dx / 28}deg)` }}
                 onPointerDown={pdown}
                 onPointerMove={pmove}

@@ -2,7 +2,8 @@
 
 ## 1.4.3
 
-- Fixed the card art spilling out past the card: the blurred background escaped the rounded clip and covered the side panel and the hint text. The card now clips its contents properly.
+- Fixed the card art spilling out past the card: the blurred background escaped the rounded clip and covered the side panel and the hint text. The card now clips its contents properly. The cards are also marked `data-sanso-skip`.
+- Card art and thumbnails are now drawn as CSS backgrounds instead of `<img>` elements, so plugins that restyle every image in Steam (3D Game Cases turned the portrait card art into 3D cases) can no longer touch them, whatever version of that plugin is installed.
 
 ## 1.4.2
 
