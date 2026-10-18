@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.3
+
+- Fixed the card art spilling out past the card: the blurred background escaped the rounded clip and covered the side panel and the hint text. The card now clips its contents properly.
+
 ## 1.4.2
 
 - First GitHub release: release zip with a prebuilt `dist/`, GitHub Actions release workflow, README with screenshots.

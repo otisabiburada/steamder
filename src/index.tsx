@@ -294,11 +294,12 @@ const CSS = `
 .sd-row2 { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 26px; }
 .sd-stage { position: relative; height: 100%; max-height: 340px; aspect-ratio: 0.76; flex: none; }
 .sd-card { position: absolute; left: 0; top: 0; width: 100%; height: 100%; border-radius: 22px; background: #1d1626; overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.55); touch-action: none; user-select: none; transition: transform .22s ease; }
+  box-shadow: 0 10px 30px rgba(0,0,0,0.55); touch-action: none; user-select: none; transition: transform .22s ease;
+  isolation: isolate; contain: paint; clip-path: inset(0 round 22px); }
 .sd-card.sd-drag { transition: none; }
 .sd-card.sd-behind { transform: scale(0.94) translateY(14px); opacity: 0.6; pointer-events: none; transition: none; }
 .sd-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-.sd-bgblur { filter: blur(22px) brightness(0.7); transform: scale(1.3); }
+.sd-bgblur { filter: blur(22px) brightness(0.7); transform: scale(1.3); will-change: transform; }
 .sd-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 68%; pointer-events: none;
   background: linear-gradient(to top, rgba(10,6,16,0.97) 0%, rgba(10,6,16,0.88) 45%, rgba(10,6,16,0) 100%); }
 .sd-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 14px 12px; display: flex; flex-direction: column; gap: 5px; pointer-events: none; }
